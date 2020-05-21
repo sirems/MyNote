@@ -120,5 +120,20 @@ namespace MyNote.API.Controllers
             db.SaveChanges();
             return StatusCode(HttpStatusCode.NoContent);
         }
+
+        #region Delete null sorunu
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public int Test(int? id = null)
+        //{
+        //    //delete null problemi
+        //    if (id==null)
+        //    {
+        //        return 888;
+        //    }
+
+        //    return 0;
+        //} 
+        #endregion
     }
 }
