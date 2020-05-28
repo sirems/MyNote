@@ -3,19 +3,66 @@
 var apiUrl = "https://localhost:44372/";
 
 
-
+        
 //FUNCTIONS
-function isLoggedIn() {
+function checkLogin() {  
     // todo:sessionstorage ve localstorage da tutulan login bilgilerine bakarak
     // login olup olmadığına karar ver ve eğer logins uygulamayı aç
     // login değilse login/register sayfasını göster
+    var loginData = getLoginData();
+
+    //giriş jetonu yok
+    if (!loginData || !loginData.access_token) {
+        showLoginPage();
+        return;
+    }
+    // token'ı geçerli mi?
+    $.ajax({
+        url: apiUrl + "api/Account/UserInfo",
+        type: "GET",
+        headers: { Authorization: "Bearer " + loginData.access_token },
+        success: function (data) {
+             showAppPage();
+        },
+        error: function () {
+            showLoginPage();
+        }
+    });
 }
 
-function loginData() {
+function showLoginPage() {
+    $(".only-logged-in").hide();
+    $(".only-logged-out").show();
+    $(".page").hide();
+    $("#page-login").show();
+}
+
+function showAppPage() {
+    $(".only-logged-in").show();
+    $(".only-logged-out").hide();
+    $(".page").hide();
+    $("#page-app").show();
+}
+
+function getLoginData() {
     // todo:sessionstorage da, eğer orada bulamadıysan
     // localstorage da kayıtlı login data yı json'dan object'e dönüştür ve yolla
     // eğer yoksa null yolla
+    var json = sessionStorage["login"] || localStorage["login"];
+
+    if (json) {
+        try {
+            return JSON.parse(json);
+        }
+        catch(e) {
+            return null;
+        }
+    }
+
+    return null;
+
 }
+
 function success(message) {
     //aktif olanın message classını içeren
     $(".tab-pane.active .message")
@@ -46,7 +93,7 @@ function error(modelState) {
             .show();
     }
 }
-    
+
 function errorMessage(message) {
     if (message) {
         $(".tab-pane.active .message")
@@ -74,7 +121,7 @@ $(document).ajaxStop(function () {
     $(".loading").addClass("d-none");
 });
 
-
+//register
 $("#signupform").submit(function (event) {
     event.preventDefault();
     var formdata = $(this).serialize();
@@ -89,12 +136,13 @@ $("#signupform").submit(function (event) {
     });
 });
 
+//login
 $("#signinform").submit(function (event) {
     event.preventDefault();
     var formdata = $(this).serialize();
 
     $.post(apiUrl + "Token", formdata, function (data) {
-        
+
 
         var datastr = JSON.stringify(data);
         if ($("#signinrememberme").prop("checked")) {
@@ -107,9 +155,10 @@ $("#signinform").submit(function (event) {
         resetLoginForms();
         success("You have been logged in successfully. Redirecting..");
 
-        setTimeout(function() {
-             $("#login").addClass("d-none");
-        },1000);
+        setTimeout(function () {
+            resetLoginForms();
+            showAppPage();
+        }, 1000);
 
     }).fail(function (xhr) {
         errorMessage(xhr.responseJSON.error_description);
@@ -127,8 +176,21 @@ $('#login a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
 
 //https://getbootstrap.com/docs/4.0/components/navs/#via-javascript
 
-$(".navbar-login a").click(function() {
+$(".navbar-login a").click(function (event) {
+    event.preventDefault();
     var href = $(this).attr("href");
-    $('#pills-tab a[href="'+href+'"]').tab('show') // Select tab by name
+    $('#pills-tab a[href="' + href + '"]').tab('show') // Select tab by name
 
 });
+
+
+//logout
+$("#btnLogout").click(function (event) {
+    event.preventDefault();
+    sessionStorage.removeItem("login");
+    localStorage.removeItem("login");
+    showLoginPage();
+});
+
+// ACTIONS
+checkLogin();
