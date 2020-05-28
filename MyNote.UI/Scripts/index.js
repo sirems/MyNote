@@ -3,9 +3,9 @@
 var apiUrl = "https://localhost:44372/";
 
 
-        
+
 //FUNCTIONS
-function checkLogin() {  
+function checkLogin() {
     // todo:sessionstorage ve localstorage da tutulan login bilgilerine bakarak
     // login olup olmadığına karar ver ve eğer logins uygulamayı aç
     // login değilse login/register sayfasını göster
@@ -17,17 +17,26 @@ function checkLogin() {
         return;
     }
     // token'ı geçerli mi?
-    $.ajax({
-        url: apiUrl + "api/Account/UserInfo",
-        type: "GET",
-        headers: { Authorization: "Bearer " + loginData.access_token },
-        success: function (data) {
-             showAppPage();
+    ajax("api/Account/UserInfo", "GET",
+        function (data) {
+            showAppPage();
         },
-        error: function () {
+        function () {
             showLoginPage();
-        }
-    });
+        });
+
+
+    //$.ajax({
+    //    url: apiUrl + "api/Account/UserInfo",
+    //    type: "GET",
+    //    headers: getAuthHeader(),
+    //    success: function (data) {
+    //        showAppPage();
+    //    },
+    //    error: function () {
+    //        showLoginPage();
+    //    }
+    //});
 }
 
 function showLoginPage() {
@@ -41,7 +50,45 @@ function showAppPage() {
     $(".only-logged-in").show();
     $(".only-logged-out").hide();
     $(".page").hide();
-    $("#page-app").show();
+
+    //notları getir
+    ajax("api/Notes/List", "GET",
+        function (data) {
+
+            $("#notes").html("");
+
+            for (var i = 0; i < data.length; i++) {
+
+                var a = $("<a/>")
+                    .attr("href", "#")
+                    .addClass("list-group-item list-group-item-action show-note")
+                    .text(data[i].Title)
+                    .prop("note", data[i]);
+
+                $("#notes").append(a);
+            }
+
+            //sayfa hazır olduğunda göster
+            $("#page-app").show();
+        },
+        function () {
+        });
+
+}
+
+function getAuthHeader() {
+    return { Authorization: "Bearer " + getLoginData().access_token }
+}
+
+function ajax(url, type, successFunc, errorFunc) {
+
+    $.ajax({
+        url: apiUrl + url,
+        type: type,
+        headers: getAuthHeader(),
+        success: successFunc,
+        error: errorFunc
+    });
 }
 
 function getLoginData() {
@@ -54,7 +101,7 @@ function getLoginData() {
         try {
             return JSON.parse(json);
         }
-        catch(e) {
+        catch (e) {
             return null;
         }
     }
@@ -81,11 +128,11 @@ function error(modelState) {
                 errors.push(modelState[prop][i]);
             }
         }
-    }
 
-    var ul = $("<ul>");
-    for (var i = 0; i < errors.length; i++) {
-        ul.append($("<li>").text(errors[i]));
+        var ul = $("<ul/>");
+        for (var i = 0; i < errors.length; i++) {
+            ul.append($("<li/>").text(errors[i]));
+        }
         $(".tab-pane.active .message")
             .removeClass("alert-success")
             .addClass("alert-danger")
@@ -192,5 +239,11 @@ $("#btnLogout").click(function (event) {
     showLoginPage();
 });
 
+$("body").on("click", ".show-note", function (event) {
+    event.preventDefault();
+    var note = this.note;
+    $("#content").val(note.Content);
+    $("#title").val(note.Title);
+});
 // ACTIONS
 checkLogin();
