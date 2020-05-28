@@ -2,8 +2,10 @@
 
 var apiUrl = "https://localhost:44372/";
 
+var selectedNote = null;
+var selectedLink = null;
 
-
+    
 //FUNCTIONS
 function checkLogin() {
     // todo:sessionstorage ve localstorage da tutulan login bilgilerine bakarak
@@ -17,7 +19,7 @@ function checkLogin() {
         return;
     }
     // token'ı geçerli mi?
-    ajax("api/Account/UserInfo", "GET",
+    ajax("api/Account/UserInfo", "GET",null,
         function (data) {
             showAppPage();
         },
@@ -52,8 +54,8 @@ function showAppPage() {
     $(".page").hide();
 
     //notları getir
-    ajax("api/Notes/List", "GET",
-        function (data) {
+    ajax("api/Notes/List", "GET", null,
+    function (data) {
 
             $("#notes").html("");
 
@@ -80,15 +82,30 @@ function getAuthHeader() {
     return { Authorization: "Bearer " + getLoginData().access_token }
 }
 
-function ajax(url, type, successFunc, errorFunc) {
+function ajax(url, type, data,successFunc, errorFunc) {
 
     $.ajax({
         url: apiUrl + url,
         type: type,
+        data:data,
         headers: getAuthHeader(),
         success: successFunc,
         error: errorFunc
     });
+}
+
+function updateNote() {
+    ajax("api/Notes/Update/" + selectedNote.Id, "PUT",
+        { Id: selectedNote.Id, Title: $("#title").val(), Content: $("#content").val() },
+        function (data) {
+            selectedLink.note = data;
+            selectedLink.text = data.Title;
+            alert("güncelleme başarılı");
+        },
+        function () {
+
+        }
+    );
 }
 
 function getLoginData() {
@@ -241,9 +258,25 @@ $("#btnLogout").click(function (event) {
 
 $("body").on("click", ".show-note", function (event) {
     event.preventDefault();
-    var note = this.note;
-    $("#content").val(note.Content);
-    $("#title").val(note.Title);
+    selectedLink = this;
+    selectedNote = this.note;
+    $("#content").val(selectedNote.Content);
+    $("#title").val(selectedNote.Title);
+
+    $(".show-note").removeClass("active");
+    $(this).addClass("active");
+
 });
+
+$("#frmNote").submit(function (event) {
+    event.preventDefault();
+    if (selectedNote) {
+        updateNote();
+    } else {
+        addNote();
+    }
+    
+});
+
 // ACTIONS
 checkLogin();

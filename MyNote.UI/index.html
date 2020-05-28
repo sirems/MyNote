@@ -155,13 +155,18 @@
                         <!--<a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>-->
                     </div>
                 </div>
-                <div class="col-md-8">
-                    <div class="form-group">
-                        <input id="title" type="text" class="form-control" placeholder="Title"/>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="content" class="form-control" placeholder="Content" rows="10" cols="20"></textarea>
-                    </div>
+                <div class="col-md-8 col-lg-9 mt-md-0 mt-3">
+                    <form id="frmNote">
+                        <div class="form-group">
+                            <input id="title" type="text" class="form-control" placeholder="Title" required />
+                        </div>
+                        <div class="form-group">
+                            <textarea id="content" class="form-control" placeholder="Content" rows="10" cols="20"></textarea>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-outline-dark">Save</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
