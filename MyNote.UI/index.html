@@ -54,14 +54,14 @@
             <!--https://codepen.io/mianzaid/pen/YBQZvg-->
             <!--https://codepen.io/yigith/pen/qBOgvgp-->
             <div class="container m-auto">
-                <div class="col-sm-8 col-lg-6 ml-auto mr-auto">
+                <div class="col-sm-8 col-lg-6 ml-auto mr-auto login-tabs-container">
                     <ul class="nav nav-pills nav-fill mb-1" id="pills-tab" role="tablist">
                         <li class="nav-item"> <a class="nav-link active" id="pills-signin-tab" data-toggle="pill" href="#pills-signin" role="tab" aria-controls="pills-signin" aria-selected="true">Sign In</a> </li>
                         <li class="nav-item"> <a class="nav-link" id="pills-signup-tab" data-toggle="pill" href="#pills-signup" role="tab" aria-controls="pills-signup" aria-selected="false">Sign Up</a> </li>
                     </ul>
                     <div class="tab-content" id="pills-tabContent">
                         <div class="tab-pane fade show active" id="pills-signin" role="tabpanel" aria-labelledby="pills-signin-tab">
-                            <div class="col-sm-12 border border-primary shadow rounded pt-4">
+                            <div class="col-sm-12 border border-primary shadow rounded py-4">
                                 <h1 class="mb-3 text-center">Login</h1>
                                 <div class="alert message"> </div>
                                 <!--<div class="text-center"><img src="https://placehold.it/80x80" class="rounded-circle border p-1"></div>-->
@@ -90,7 +90,7 @@
                             </div>
                         </div>
                         <div class="tab-pane fade" id="pills-signup" role="tabpanel" aria-labelledby="pills-signup-tab">
-                            <div class="col-sm-12 border border-primary shadow rounded pt-4">
+                            <div class="col-sm-12 border border-primary shadow rounded py-4">
                                 <h1 class="mb-3 text-center">Register</h1>
                                 <!--<div class="text-center"><img src="https://placehold.it/80x80" class="rounded-circle border p-1"></div>-->
                                 <!--<div id="signuperrors" class="alert alert-danger errors"></div>
@@ -151,6 +151,9 @@
         <div class="container-fluid">
             <div class="row pt-3">
                 <div class="col-md-4 col-lg-3">
+                    <button type="button" class="btn btn-outline-success mb-2 add-new-note">
+                        <i class="fas fa-plus-circle" ></i>New Note
+                    </button>
                     <div class="list-group" id="notes">
                         <!--<a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>-->
                     </div>
@@ -163,8 +166,11 @@
                         <div class="form-group">
                             <textarea id="content" class="form-control" placeholder="Content" rows="10" cols="20"></textarea>
                         </div>
-                        <div>
+                        <div class="d-flex">
                             <button type="submit" class="btn btn-outline-dark">Save</button>
+                            <button id="btnDelete" type="button" class="btn btn-outline-danger ml-auto">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </div>
                     </form>
                 </div>

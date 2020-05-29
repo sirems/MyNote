@@ -5,7 +5,7 @@ var apiUrl = "https://localhost:44372/";
 var selectedNote = null;
 var selectedLink = null;
 
-    
+
 //FUNCTIONS
 function checkLogin() {
     // todo:sessionstorage ve localstorage da tutulan login bilgilerine bakarak
@@ -19,7 +19,7 @@ function checkLogin() {
         return;
     }
     // token'ı geçerli mi?
-    ajax("api/Account/UserInfo", "GET",null,
+    ajax("api/Account/UserInfo", "GET", null,
         function (data) {
             showAppPage();
         },
@@ -55,19 +55,12 @@ function showAppPage() {
 
     //notları getir
     ajax("api/Notes/List", "GET", null,
-    function (data) {
+        function (data) {
 
             $("#notes").html("");
 
             for (var i = 0; i < data.length; i++) {
-
-                var a = $("<a/>")
-                    .attr("href", "#")
-                    .addClass("list-group-item list-group-item-action show-note")
-                    .text(data[i].Title)
-                    .prop("note", data[i]);
-
-                $("#notes").append(a);
+                addMenuLink(data[i]);
             }
 
             //sayfa hazır olduğunda göster
@@ -78,20 +71,49 @@ function showAppPage() {
 
 }
 
+function addMenuLink(note, isActive = false) {
+    var a = $("<a/>")
+        .attr("href", "#")
+        .addClass("list-group-item list-group-item-action show-note")
+        .text(note.Title)
+        .prop("note", note);
+
+    if (isActive) {
+        $(".show-note").removeClass("active");
+        a.addClass("active");
+        selectedLink = a.get(0);  //domu aldık
+        selectedNote = note;
+    }
+
+    $("#notes").prepend(a);
+}
+
 function getAuthHeader() {
     return { Authorization: "Bearer " + getLoginData().access_token }
 }
 
-function ajax(url, type, data,successFunc, errorFunc) {
+function ajax(url, type, data, successFunc, errorFunc) {
 
     $.ajax({
         url: apiUrl + url,
         type: type,
-        data:data,
+        data: data,
         headers: getAuthHeader(),
         success: successFunc,
         error: errorFunc
     });
+}
+
+function addNote() {
+    ajax("api/Notes/New", "POST",
+        { Title: $("#title").val(), Content: $("#content").val() },
+        function (data) {
+            addMenuLink(data, true);
+        },
+        function () {
+
+        }
+    );
 }
 
 function updateNote() {
@@ -99,8 +121,8 @@ function updateNote() {
         { Id: selectedNote.Id, Title: $("#title").val(), Content: $("#content").val() },
         function (data) {
             selectedLink.note = data;
-            selectedLink.text = data.Title;
-            alert("güncelleme başarılı");
+            //$(selectedLink).text(data.Title);
+            selectedLink.textContent = data.Title;
         },
         function () {
 
@@ -173,6 +195,14 @@ function resetLoginForms() {
     $("#login form").each(function () {
         this.reset();
     });
+}
+
+function resetNoteForm() {
+    selectedLink = null;
+    selectedNote = null;
+    $(".show-note").removeClass("active");
+    $("#title").val("");
+    $("#content").val("");
 }
 
 //EVENTS
@@ -251,14 +281,20 @@ $(".navbar-login a").click(function (event) {
 //logout
 $("#btnLogout").click(function (event) {
     event.preventDefault();
+    resetNoteForm();
     sessionStorage.removeItem("login");
     localStorage.removeItem("login");
     showLoginPage();
 });
 
+//clear selection and form
+$(".add-new-note").click(function () {
+    resetNoteForm();
+});
+
 $("body").on("click", ".show-note", function (event) {
     event.preventDefault();
-    selectedLink = this;
+    selectedLink = this;    //domu atadık
     selectedNote = this.note;
     $("#content").val(selectedNote.Content);
     $("#title").val(selectedNote.Title);
@@ -275,8 +311,30 @@ $("#frmNote").submit(function (event) {
     } else {
         addNote();
     }
-    
+
 });
 
+//delete note
+// delete note
+$("#btnDelete").click(function () {
+    if (selectedNote) {
+        if (confirm("Are you sure to delete the selected note?")) {
+            ajax("api/Notes/Delete/" + selectedNote.Id, "DELETE", null,
+                function (data) {
+                    $(selectedLink).remove();
+                    resetNoteForm();
+                },
+                function () {
+
+                }
+            );
+        }
+    }
+    else {
+        if (confirm("Are you sure to delete the draft?")) {
+            resetNoteForm();
+        }
+    }
+});
 // ACTIONS
 checkLogin();
